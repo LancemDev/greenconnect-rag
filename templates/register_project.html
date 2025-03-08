@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block title %}Register Project{% endblock %}
+{% block content %}
+<div class="glass p-8 rounded-lg max-w-lg mx-auto">
+    <h2 class="text-3xl font-bold mb-6">Register Your Project</h2>
+    <form method="POST" action="/project/register">
+        <div class="mb-4">
+            <label for="project_name" class="block text-gray-700">Project Name</label>
+            <input type="text" id="project_name" name="project_name" class="w-full p-2 border rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="project_type" class="block text-gray-700">Project Type</label>
+            <select id="project_type" name="project_type" class="w-full p-2 border rounded" required>
+                <option value="forestry">Forestry</option>
+                <option value="agriculture">Agriculture</option>
+                <option value="agroforestry">Agroforestry</option>
+                <option value="wetland">Wetland</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="latitude" class="block text-gray-700">Latitude</label>
+            <input type="text" id="latitude" name="latitude" class="w-full p-2 border rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="longitude" class="block text-gray-700">Longitude</label>
+            <input type="text" id="longitude" name="longitude" class="w-full p-2 border rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="area_size" class="block text-gray-700">Area Size</label>
+            <input type="text" id="area_size" name="area_size" class="w-full p-2 border rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="area_unit" class="block text-gray-700">Area Unit</label>
+            <select id="area_unit" name="area_unit" class="w-full p-2 border rounded" required>
+                <option value="hectares">Hectares</option>
+                <option value="acres">Acres</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="description" class="block text-gray-700">Description</label>
+            <textarea id="description" name="description" class="w-full p-2 border rounded" required></textarea>
+        </div>
+        <div class="mb-4">
+            <label for="start_date" class="block text-gray-700">Start Date</label>
+            <input type="date" id="start_date" name="start_date" class="w-full p-2 border rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="boundary_geojson" class="block text-gray-700">Boundary GeoJSON</label>
+            <textarea id="boundary_geojson" name="boundary_geojson" class="w-full p-2 border rounded"></textarea>
+        </div>
+        <button type="submit" class="glass px-6 py-3 rounded-full text-white font-semibold hover:bg-green-600 transition">Register Project</button>
+    </form>
+</div>
+{% endblock %}

@@ -40,6 +40,33 @@ def is_logged_in():
 def index():
     return render_template('index.html')
 
+# Login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        
+        conn = get_db_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+                user = cursor.fetchone()
+                
+                if user and check_password_hash(user['password_hash'], password):
+                    session['user_id'] = user['id']
+                    session['username'] = user['username']
+                    flash('Login successful!', 'success')
+                    return redirect(url_for('dashboard'))
+                else:
+                    flash('Invalid email or password', 'error')
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'error')
+        finally:
+            conn.close()
+            
+    return render_template('login.html')
+
 # User registration
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -84,33 +111,6 @@ def register():
             conn.close()
             
     return render_template('register.html')
-
-# Login
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        
-        conn = get_db_connection()
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-                user = cursor.fetchone()
-                
-                if user and check_password_hash(user['password_hash'], password):
-                    session['user_id'] = user['id']
-                    session['username'] = user['username']
-                    flash('Login successful!', 'success')
-                    return redirect(url_for('dashboard'))
-                else:
-                    flash('Invalid email or password', 'error')
-        except Exception as e:
-            flash(f'Error: {str(e)}', 'error')
-        finally:
-            conn.close()
-            
-    return render_template('login.html')
 
 # Logout
 @app.route('/logout')
