@@ -2,12 +2,17 @@ import os
 import json
 import openai
 from dotenv import load_dotenv
+import logging
 
 # Load environment variables
 load_dotenv()
 
 # Configure OpenAI API
 openai.api_key = os.getenv('OPENAI_API_KEY')
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def analyze_project(project_data):
     """
@@ -42,7 +47,9 @@ def analyze_project(project_data):
         carbon_estimate, confidence_score, methodology, data_sources, risks, recommendations
         """
         
-        response = openai.chat.completions.create(
+        logger.info("Sending project data to OpenAI for analysis: %s", project_data)
+        
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are an expert carbon analyst specializing in nature-based solutions. Provide accurate, science-based assessments using available data."},
@@ -52,8 +59,12 @@ def analyze_project(project_data):
             max_tokens=1000
         )
         
+        logger.info("Received response from OpenAI: %s", response)
+        
         # Extract the JSON response
-        result_text = response.choices[0].message.content
+        result_text = response.choices[0].message['content']
+        logger.info("Parsed result from OpenAI response: %s", result_text)
+        
         result = json.loads(result_text)
         
         # Add model version information
@@ -62,7 +73,7 @@ def analyze_project(project_data):
         return result
         
     except Exception as e:
-        print(f"OpenAI analysis error: {str(e)}")
+        logger.error("OpenAI analysis error: %s", e)
         # Return fallback values if AI analysis fails
         return {
             "carbon_estimate": estimate_fallback(project_data),
@@ -136,7 +147,9 @@ def generate_assessment_report(project_data):
         This report will be used for carbon credit verification purposes.
         """
         
-        response = openai.chat.completions.create(
+        logger.info("Sending project data to OpenAI for report generation: %s", project_data)
+        
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a carbon project verification expert. Generate professional, detailed assessment reports following industry standards."},
@@ -146,7 +159,8 @@ def generate_assessment_report(project_data):
             max_tokens=2500
         )
         
-        report_content = response.choices[0].message.content
+        report_content = response.choices[0].message['content']
+        logger.info("Received report content from OpenAI: %s", report_content)
         
         # In a production environment, this would generate a PDF
         # Here we're just returning status
@@ -158,7 +172,7 @@ def generate_assessment_report(project_data):
         }
         
     except Exception as e:
-        print(f"Report generation error: {str(e)}")
+        logger.error("Report generation error: %s", e)
         return {
             "status": "error",
             "message": str(e)

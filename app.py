@@ -247,8 +247,8 @@ def register_project():
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """, (
                     project_id,
-                    assessment_result.get('carbon_estimate', 0),
-                    assessment_result.get('confidence_score', 0),
+                    assessment_result.get('carbon_estimate', 0.0),
+                    assessment_result.get('confidence_score', 0.0),
                     assessment_result.get('methodology', 'AI-based assessment'),
                     json.dumps(assessment_result.get('data_sources', {})),
                     assessment_result.get('model_version', 'gpt-4'),
@@ -272,7 +272,7 @@ def register_project():
                     assessment_result.get('model_version', 'gpt-4'),
                     json.dumps(project_data),
                     json.dumps(assessment_result),
-                    assessment_result.get('confidence_score', 0),
+                    assessment_result.get('confidence_score', 0.0),
                     'initial'
                 ))
                 conn.commit()
