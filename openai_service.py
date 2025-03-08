@@ -67,8 +67,15 @@ def analyze_project(project_data):
         
         result = json.loads(result_text)
         
+        # Extract and convert the carbon estimate to a numeric value
+        carbon_estimate_str = result.get('carbon_estimate', '')
+        carbon_estimate = 0.0
+        if 'tons CO2e/year' in carbon_estimate_str:
+            carbon_estimate = float(carbon_estimate_str.split(' ')[0])
+        
         # Add model version information
         result['model_version'] = "gpt-4"
+        result['carbon_estimate'] = carbon_estimate
         
         return result
         
