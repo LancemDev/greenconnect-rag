@@ -161,8 +161,58 @@ def setup_database():
             )
         ''')
         
+        # Insert dummy data
+        cursor.execute('''
+            INSERT INTO users (username, email, password_hash, user_type, verification_status)
+            VALUES 
+            ('john_doe', 'john@example.com', 'hashed_password', 'individual', 'verified'),
+            ('jane_doe', 'jane@example.com', 'hashed_password', 'organization', 'verified')
+        ''')
+        
+        cursor.execute('''
+            INSERT INTO projects (user_id, project_name, project_type, location_lat, location_lng, area_size, area_unit, description, start_date, status, boundary_geojson)
+            VALUES 
+            (1, 'Forest Conservation', 'forestry', 34.052235, -118.243683, 100.00, 'hectares', 'A project to conserve forest area.', '2023-01-01', 'registered', '{}'),
+            (2, 'Wetland Restoration', 'wetland', 36.778259, -119.417931, 50.00, 'acres', 'A project to restore wetland.', '2023-02-01', 'registered', '{}')
+        ''')
+        
+        cursor.execute('''
+            INSERT INTO carbon_assessments (project_id, carbon_estimate, confidence_score, methodology, data_sources, ai_model_version, verification_status)
+            VALUES 
+            (1, 5000.00, 95.00, 'AI-based assessment', '{"source": "satellite"}', 'gpt-4', 'approved'),
+            (2, 3000.00, 90.00, 'AI-based assessment', '{"source": "satellite"}', 'gpt-4', 'approved')
+        ''')
+        
+        cursor.execute('''
+            INSERT INTO carbon_credits (project_id, assessment_id, credit_amount, expiry_date, certificate_id, status, price_per_credit, verification_document_url)
+            VALUES 
+            (1, 1, 5000.00, '2028-01-01', 'CC-1-abc123', 'available', 25.00, '/reports/1_20230101.pdf'),
+            (2, 2, 3000.00, '2028-02-01', 'CC-2-def456', 'available', 30.00, '/reports/2_20230201.pdf')
+        ''')
+        
+        cursor.execute('''
+            INSERT INTO transactions (credit_id, buyer_id, seller_id, amount, price_per_unit, total_price, status)
+            VALUES 
+            (1, 2, 1, 1000.00, 25.00, 25000.00, 'completed'),
+            (2, 1, 2, 500.00, 30.00, 15000.00, 'completed')
+        ''')
+        
+        cursor.execute('''
+            INSERT INTO satellite_data (project_id, capture_date, ndvi_value, land_cover_classification, cloud_cover_percentage, source, raw_data_url, processed_data_url)
+            VALUES 
+            (1, '2023-01-15', 0.75, 'Forest', 10.00, 'Sentinel-2', 'http://example.com/raw1', 'http://example.com/processed1'),
+            (2, '2023-02-15', 0.65, 'Wetland', 5.00, 'Sentinel-2', 'http://example.com/raw2', 'http://example.com/processed2')
+        ''')
+        
+        cursor.execute('''
+            INSERT INTO ai_verification_logs (project_id, assessment_id, model_used, input_data, output_result, confidence_score, verification_type)
+            VALUES 
+            (1, 1, 'gpt-4', '{"project_type": "forestry"}', '{"carbon_estimate": 5000.00}', 95.00, 'initial'),
+            (2, 2, 'gpt-4', '{"project_type": "wetland"}', '{"carbon_estimate": 3000.00}', 90.00, 'initial')
+        ''')
+        
         conn.commit()
-        print("Database setup completed successfully")
+        print("Database setup and dummy data insertion completed successfully")
         
     except Exception as e:
         print(f"Database setup error: {e}")

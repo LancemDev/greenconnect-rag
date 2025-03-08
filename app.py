@@ -8,6 +8,7 @@ import secrets
 from werkzeug.security import generate_password_hash, check_password_hash
 from openai_service import analyze_project, generate_assessment_report
 from satellite_service import fetch_satellite_imagery, analyze_satellite_data
+from urllib.parse import urlparse
 
 # Load environment variables
 load_dotenv()
@@ -15,13 +16,14 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', secrets.token_hex(16))
 
-# Database connection parameters
+# Parse the public URL
+url = urlparse(os.getenv('MYSQL_PUBLIC_URL'))
 db_config = {
-    'host': os.getenv('MYSQLHOST', 'mysql.railway.internal'),
-    'user': os.getenv('MYSQLUSER', 'root'),
-    'password': os.getenv('MYSQLPASSWORD', 'gytdDlhBlQEGKMWZcTVluDdOjAhRwhlH'),
-    'database': os.getenv('MYSQLDATABASE', 'railway'),
-    'port': int(os.getenv('MYSQLPORT', 3306)),
+    'host': url.hostname,
+    'user': url.username,
+    'password': url.password,
+    'database': url.path[1:],  # Remove leading '/'
+    'port': url.port,
     'cursorclass': pymysql.cursors.DictCursor
 }
 
