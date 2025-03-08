@@ -208,7 +208,83 @@ def register_project():
                 
                 flash('Project registered successfully!', 'success')
                 
-                # Queue the project for AI assessment
+                # Fetch satellite imagery
+                satellite_data = fetch_satellite_imagery(float(lat), float(lng), float(area_size), area_unit)
+                
+                # Store satellite data
+                cursor.execute("""
+                    INSERT INTO satellite_data 
+                    (project_id, capture_date, ndvi_value, land_cover_classification, 
+                     cloud_cover_percentage, source, raw_data_url, processed_data_url)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    project_id, 
+                    datetime.now().strftime('%Y-%m-%d'),
+                    satellite_data.get('ndvi_value', 0),
+                    satellite_data.get('land_cover_classification', 'Unknown'),
+                    satellite_data.get('cloud_cover_percentage', 0),
+                    satellite_data.get('source', 'Sentinel-2'),
+                    satellite_data.get('raw_data_url', ''),
+                    satellite_data.get('processed_data_url', '')
+                ))
+                conn.commit()
+                
+                # Analyze project with OpenAI
+                project_data = {
+                    'project_type': project_type,
+                    'area_size': float(area_size),
+                    'area_unit': area_unit,
+                    'satellite_data': satellite_data
+                }
+                
+                assessment_result = analyze_project(project_data)
+                
+                # Store assessment result
+                cursor.execute("""
+                    INSERT INTO carbon_assessments 
+                    (project_id, carbon_estimate, confidence_score, methodology, 
+                     data_sources, ai_model_version, verification_status)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    project_id,
+                    assessment_result.get('carbon_estimate', 0),
+                    assessment_result.get('confidence_score', 0),
+                    assessment_result.get('methodology', 'AI-based assessment'),
+                    json.dumps(assessment_result.get('data_sources', {})),
+                    assessment_result.get('model_version', 'gpt-4'),
+                    'pending'
+                ))
+                conn.commit()
+                
+                # Get the assessment ID
+                cursor.execute("SELECT LAST_INSERT_ID() as id")
+                assessment_id = cursor.fetchone()['id']
+                
+                # Log AI verification
+                cursor.execute("""
+                    INSERT INTO ai_verification_logs 
+                    (project_id, assessment_id, model_used, input_data, 
+                     output_result, confidence_score, verification_type)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    project_id,
+                    assessment_id,
+                    assessment_result.get('model_version', 'gpt-4'),
+                    json.dumps(project_data),
+                    json.dumps(assessment_result),
+                    assessment_result.get('confidence_score', 0),
+                    'initial'
+                ))
+                conn.commit()
+                
+                # Update project status based on assessment result
+                cursor.execute("""
+                    UPDATE projects 
+                    SET status = 'assessing' 
+                    WHERE id = %s
+                """, (project_id,))
+                conn.commit()
+                
                 return redirect(url_for('project_assessment', project_id=project_id))
         except Exception as e:
             flash(f'Error: {str(e)}', 'error')
