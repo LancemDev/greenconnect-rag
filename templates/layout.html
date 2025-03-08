@@ -6,7 +6,7 @@
     <title>CarbonVerify - {% block title %}{% endblock %}</title>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/static/css/tailwind.css" rel="stylesheet">
     
     <!-- Custom Styles -->
     <style>
@@ -190,3 +190,11 @@
     <!-- Scripts -->
     <script>
         // Mobile menu toggle
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            var menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
