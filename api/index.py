@@ -32,7 +32,13 @@ def get_db_connection():
     return pymysql.connect(**db_config)
 
 # Check if user is logged in
-def is_logged_in():
+def is_logged_in():from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/', methods=['POST'])
+def index():
+    return jsonify({'message': 'Hello, World!'})
     return 'user_id' in session
 
 # Home page

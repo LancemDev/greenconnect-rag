@@ -1,12 +1,1 @@
-flask
-pymysql
-python-dotenv
-openai
-cryptography
-Pillow
-requests
-geopy
-earthengine-api
-google-cloud-storage
-gunicorn
-sentinelsat
+Flask
