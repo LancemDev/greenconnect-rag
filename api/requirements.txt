@@ -1,7 +1,4 @@
-Flask
-Flask-SQLAlchemy
-Flask-Login
-Flask-WTF
+flask
 pymysql
 python-dotenv
 openai
