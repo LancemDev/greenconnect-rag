@@ -1,14 +1,14 @@
 import os
 import json
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 import logging
 
 # Load environment variables
 load_dotenv()
 
-# Configure OpenAI API
-openai.api_key = os.getenv('OPENAI_API_KEY')
+# Configure OpenAI API client
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -49,7 +49,7 @@ def analyze_project(project_data):
         
         logger.info("Sending project data to OpenAI for analysis: %s", project_data)
         
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are an expert carbon analyst specializing in nature-based solutions. Provide accurate, science-based assessments using available data."},
@@ -62,7 +62,7 @@ def analyze_project(project_data):
         logger.info("Received response from OpenAI: %s", response)
         
         # Extract the JSON response
-        result_text = response.choices[0].message['content']
+        result_text = response.choices[0].message.content
         logger.info("Parsed result from OpenAI response: %s", result_text)
         
         result = json.loads(result_text)
@@ -149,7 +149,7 @@ def generate_assessment_report(project_data):
         
         logger.info("Sending project data to OpenAI for report generation: %s", project_data)
         
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a carbon project verification expert. Generate professional, detailed assessment reports following industry standards."},
@@ -159,7 +159,7 @@ def generate_assessment_report(project_data):
             max_tokens=2500
         )
         
-        report_content = response.choices[0].message['content']
+        report_content = response.choices[0].message.content
         logger.info("Received report content from OpenAI: %s", report_content)
         
         # In a production environment, this would generate a PDF
