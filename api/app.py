@@ -209,7 +209,7 @@ def register_project():
                 flash('Project registered successfully!', 'success')
                 
                 # Fetch satellite imagery
-                satellite_data = fetch_satellite_imagery(float(lat), float(lng), float(area_size), area_unit)
+                satellite_data = fetch_satellite_imagery(float(lat), float(lng), float(area_size), area_unit, start_date)
                 
                 # Store satellite data
                 cursor.execute("""
@@ -280,7 +280,7 @@ def register_project():
                     assessment_result.get('model_version', 'gpt-4'),
                     json.dumps(project_data),
                     json.dumps(assessment_result),
-                    assessment_result.get('confidence_score', 0.0),
+                    confidence_score,
                     'initial'
                 ))
                 conn.commit()
@@ -335,7 +335,8 @@ def project_assessment(project_id):
                     float(project['location_lat']), 
                     float(project['location_lng']),
                     float(project['area_size']),
-                    project['area_unit']
+                    project['area_unit'],
+                    project['start_date']
                 )
                 
                 # Store satellite data
@@ -407,7 +408,7 @@ def project_assessment(project_id):
                     assessment_result.get('model_version', 'gpt-4'),
                     json.dumps(project_data),
                     json.dumps(assessment_result),
-                    assessment_result.get('confidence_score', 0),
+                    confidence_score,
                     'initial'
                 ))
                 conn.commit()
