@@ -4,8 +4,7 @@ import json
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
-from shapely.geometry import Point
-from shapely.geometry.polygon import Polygon
+from geopy.distance import geodesic
 
 # Load environment variables
 load_dotenv()
@@ -29,16 +28,16 @@ def fetch_satellite_imagery(lat, lng, area_size, area_unit, start_date):
     """
     try:
         # Define the area of interest
-        point = Point(lng, lat)
-        buffer_size = area_size * 10000 if area_unit == 'hectares' else area_size * 4046.86
-        aoi = point.buffer(buffer_size)
+        buffer_size_km = area_size * 0.1 if area_unit == 'hectares' else area_size * 0.00404686
+        point = (lat, lng)
+        aoi = geodesic(kilometers=buffer_size_km).destination(point, 0).format_decimal()
 
         # Define the time range
         start_date = datetime.strptime(start_date, '%Y-%m-%d')
         end_date = start_date + timedelta(days=365)
 
         # Search for Sentinel-2 products
-        products = api.query(aoi.wkt,
+        products = api.query(aoi,
                              date=(start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')),
                              platformname='Sentinel-2',
                              cloudcoverpercentage=(0, 20))
