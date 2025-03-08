@@ -1,23 +1,45 @@
 import pymysql
 import os
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 
 load_dotenv()
 
-# Database connection parameters
+# Parse the public URL
+url = urlparse(os.getenv('MYSQL_PUBLIC_URL'))
 connection_params = {
-    'host': os.getenv('MYSQLHOST', 'mysql.railway.internal'),
-    'user': os.getenv('MYSQLUSER', 'root'),
-    'password': os.getenv('MYSQLPASSWORD', 'gytdDlhBlQEGKMWZcTVluDdOjAhRwhlH'),
-    'database': os.getenv('MYSQLDATABASE', 'railway'),
-    'port': int(os.getenv('MYSQLPORT', 3306))
+    'host': url.hostname,
+    'user': url.username,
+    'password': url.password,
+    'database': url.path[1:],  # Remove leading '/'
+    'port': url.port
 }
+
+# Print connection parameters for debugging
+print("Connection parameters:", connection_params)
+
+# Drop existing tables
+def drop_tables(cursor):
+    tables = [
+        'ai_verification_logs',
+        'satellite_data',
+        'transactions',
+        'carbon_credits',
+        'carbon_assessments',
+        'projects',
+        'users'
+    ]
+    for table in tables:
+        cursor.execute(f"DROP TABLE IF EXISTS {table}")
 
 # Create tables
 def setup_database():
     try:
         conn = pymysql.connect(**connection_params)
         cursor = conn.cursor()
+        
+        # Drop existing tables
+        drop_tables(cursor)
         
         # Users table
         cursor.execute('''
