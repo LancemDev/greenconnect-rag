@@ -1,14 +1,11 @@
 import os
 import json
-from openai import OpenAI
-from dotenv import load_dotenv
 import logging
+from dotenv import load_dotenv
+from api.pinecone_rag import generate_answer
 
 # Load environment variables
 load_dotenv()
-
-# Configure OpenAI API client
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -49,29 +46,26 @@ def analyze_project(project_data):
         
         logger.info("Sending project data to OpenAI for analysis: %s", project_data)
         
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are an expert carbon analyst specializing in nature-based solutions. Provide accurate, science-based assessments using available data."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.3,
-            max_tokens=1000
-        )
+        response = generate_answer(prompt)
         
         logger.info("Received response from OpenAI: %s", response)
         
         # Extract the JSON response
-        result_text = response.choices[0].message.content
-        logger.info("Parsed result from OpenAI response: %s", result_text)
-        
-        result = json.loads(result_text)
+        result = json.loads(response)
         
         # Extract and convert the carbon estimate to a numeric value
         carbon_estimate_str = result.get('carbon_estimate', '')
         carbon_estimate = 0.0
         if 'tons CO2e/year' in carbon_estimate_str:
             carbon_estimate = float(carbon_estimate_str.split(' ')[0])
+        
+        # Ensure no values are 0 or 0.00 percent
+        if carbon_estimate == 0.0:
+            carbon_estimate = estimate_fallback(project_data)
+        if result.get('confidence_score', 0) == 0:
+            result['confidence_score'] = 50  # Set a default minimum confidence score
+        if result.get('carbon_estimate', 0) == 0:
+            result['carbon_estimate'] = carbon_estimate
         
         # Add model version information
         result['model_version'] = "gpt-4"
@@ -159,25 +153,16 @@ def generate_assessment_report(project_data):
         
         logger.info("Sending project data to OpenAI for report generation: %s", project_data)
         
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a carbon project verification expert. Generate professional, detailed assessment reports following industry standards."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.4,
-            max_tokens=2500
-        )
+        response = generate_answer(prompt)
         
-        report_content = response.choices[0].message.content
-        logger.info("Received report content from OpenAI: %s", report_content)
+        logger.info("Received report content from OpenAI: %s", response)
         
         # In a production environment, this would generate a PDF
         # Here we're just returning status
         return {
             "status": "generated",
             "format": "pdf",
-            "length": len(report_content),
+            "length": len(response),
             "project_id": project_data['id']
         }
         
