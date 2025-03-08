@@ -45,12 +45,12 @@ def setup_database():
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                username VARCHAR(100) NOT NULL UNIQUE,
-                email VARCHAR(100) NOT NULL UNIQUE,
-                password_hash VARCHAR(200) NOT NULL,
+                username VARCHAR(150) NOT NULL UNIQUE,
+                email VARCHAR(150) NOT NULL UNIQUE,
+                password_hash VARCHAR(255) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 user_type ENUM('individual', 'organization') NOT NULL,
-                profile_img_url VARCHAR(255),
+                profile_img_url VARCHAR(500),
                 verification_status ENUM('pending', 'verified') DEFAULT 'pending'
             )
         ''')
@@ -60,7 +60,7 @@ def setup_database():
             CREATE TABLE IF NOT EXISTS projects (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
-                project_name VARCHAR(200) NOT NULL,
+                project_name VARCHAR(255) NOT NULL,
                 project_type ENUM('forestry', 'agriculture', 'agroforestry', 'wetland', 'other') NOT NULL,
                 location_lat DECIMAL(10, 8) NOT NULL,
                 location_lng DECIMAL(11, 8) NOT NULL,
@@ -83,11 +83,11 @@ def setup_database():
                 assessment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 carbon_estimate DECIMAL(12, 2) NOT NULL,
                 confidence_score DECIMAL(5, 2) NOT NULL,
-                methodology VARCHAR(100) NOT NULL,
+                methodology VARCHAR(255) NOT NULL,
                 data_sources JSON NOT NULL,
-                ai_model_version VARCHAR(50) NOT NULL,
+                ai_model_version VARCHAR(100) NOT NULL,
                 verification_status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
-                report_url VARCHAR(255),
+                report_url VARCHAR(500),
                 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
             )
         ''')
@@ -101,10 +101,10 @@ def setup_database():
                 credit_amount DECIMAL(12, 2) NOT NULL,
                 issuance_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 expiry_date DATE,
-                certificate_id VARCHAR(100) UNIQUE NOT NULL,
+                certificate_id VARCHAR(150) UNIQUE NOT NULL,
                 status ENUM('available', 'reserved', 'sold', 'expired') DEFAULT 'available',
                 price_per_credit DECIMAL(10, 2),
-                verification_document_url VARCHAR(255),
+                verification_document_url VARCHAR(500),
                 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
                 FOREIGN KEY (assessment_id) REFERENCES carbon_assessments(id) ON DELETE CASCADE
             )
@@ -135,11 +135,11 @@ def setup_database():
                 project_id INT NOT NULL,
                 capture_date DATE NOT NULL,
                 ndvi_value DECIMAL(5, 4),
-                land_cover_classification VARCHAR(50),
+                land_cover_classification VARCHAR(100),
                 cloud_cover_percentage DECIMAL(5, 2),
-                source VARCHAR(50) NOT NULL,
-                raw_data_url VARCHAR(255),
-                processed_data_url VARCHAR(255),
+                source VARCHAR(100) NOT NULL,
+                raw_data_url VARCHAR(500),
+                processed_data_url VARCHAR(500),
                 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
             )
         ''')

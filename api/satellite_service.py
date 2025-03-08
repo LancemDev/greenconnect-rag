@@ -13,7 +13,7 @@ load_dotenv()
 # Initialize Sentinel API
 api = SentinelAPI(None, None, 'https://scihub.copernicus.eu/dhus', show_progressbars=True)
 
-def fetch_satellite_imagery(lat, lng, area_size, area_unit):
+def fetch_satellite_imagery(lat, lng, area_size, area_unit, start_date):
     """
     Fetch satellite imagery and derived data for a given location using Sentinel API.
     
@@ -22,6 +22,7 @@ def fetch_satellite_imagery(lat, lng, area_size, area_unit):
         lng (float): Longitude coordinate
         area_size (float): Size of the area
         area_unit (str): Unit of area measurement ('hectares' or 'acres')
+        start_date (str): Start date for the imagery in 'YYYY-MM-DD' format
         
     Returns:
         dict: Satellite imagery analysis data
@@ -33,12 +34,12 @@ def fetch_satellite_imagery(lat, lng, area_size, area_unit):
         aoi = point.buffer(buffer_size)
 
         # Define the time range
-        start_date = '2024-01-01'
-        end_date = '2024-12-31'
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = start_date + timedelta(days=365)
 
         # Search for Sentinel-2 products
         products = api.query(aoi.wkt,
-                             date=(start_date, end_date),
+                             date=(start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')),
                              platformname='Sentinel-2',
                              cloudcoverpercentage=(0, 20))
 

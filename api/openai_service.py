@@ -77,6 +77,9 @@ def analyze_project(project_data):
         result['model_version'] = "gpt-4"
         result['carbon_estimate'] = carbon_estimate
         
+        # Truncate methodology to fit within the column length limit (assuming 255 characters)
+        result['methodology'] = result.get('methodology', 'AI-based assessment')[:255]
+        
         return result
         
     except Exception as e:

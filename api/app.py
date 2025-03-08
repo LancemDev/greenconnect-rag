@@ -239,6 +239,14 @@ def register_project():
                 
                 assessment_result = analyze_project(project_data)
                 
+                # Ensure confidence_score is a valid decimal
+                confidence_score = assessment_result.get('confidence_score', 0.0)
+                if not isinstance(confidence_score, (int, float)):
+                    confidence_score = 0.0
+
+                # Truncate methodology to fit within the column length limit (assuming 255 characters)
+                methodology = assessment_result.get('methodology', 'AI-based assessment')[:255]
+
                 # Store assessment result
                 cursor.execute("""
                     INSERT INTO carbon_assessments 
@@ -248,8 +256,8 @@ def register_project():
                 """, (
                     project_id,
                     assessment_result.get('carbon_estimate', 0.0),
-                    assessment_result.get('confidence_score', 0.0),
-                    assessment_result.get('methodology', 'AI-based assessment'),
+                    confidence_score,
+                    methodology,
                     json.dumps(assessment_result.get('data_sources', {})),
                     assessment_result.get('model_version', 'gpt-4'),
                     'pending'
@@ -358,6 +366,14 @@ def project_assessment(project_id):
                 
                 assessment_result = analyze_project(project_data)
                 
+                # Ensure confidence_score is a valid decimal
+                confidence_score = assessment_result.get('confidence_score', 0.0)
+                if not isinstance(confidence_score, (int, float)):
+                    confidence_score = 0.0
+
+                # Truncate methodology to fit within the column length limit (assuming 255 characters)
+                methodology = assessment_result.get('methodology', 'AI-based assessment')[:255]
+
                 # Store assessment result
                 cursor.execute("""
                     INSERT INTO carbon_assessments 
@@ -367,8 +383,8 @@ def project_assessment(project_id):
                 """, (
                     project_id,
                     assessment_result.get('carbon_estimate', 0),
-                    assessment_result.get('confidence_score', 0),
-                    assessment_result.get('methodology', 'AI-based assessment'),
+                    confidence_score,
+                    methodology,
                     json.dumps(assessment_result.get('data_sources', {})),
                     assessment_result.get('model_version', 'gpt-4'),
                     'pending'
